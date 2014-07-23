@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Utils.Http where
 
+import Control.Applicative ((<$>))
 import qualified Control.Exception as E
 import Control.Monad.Error
 import Data.Aeson as Json
@@ -10,6 +11,7 @@ import Data.Monoid ((<>))
 import qualified Data.Vector as Vector
 import Network
 import Network.HTTP.Client
+import Network.HTTP.Client.Internal (addProxy)
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Network.HTTP.Types
 
@@ -21,7 +23,7 @@ send url handler =
        either throwError return result
     where
       sendRequest = do
-        request <- parseUrl url
+        request <- addProxy "127.0.0.1" 3128 <$> parseUrl url
         withSocketsDo $ withManager tlsManagerSettings (handler request)
 
       handleError exception =
